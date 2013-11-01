@@ -12,6 +12,7 @@ from subprocess import Popen
 
 REPO = "decorator"
 repodir = os.path.join(os.path.dirname(__file__), REPO)
+densities = {".": 1, "-": 10, "+": 20, "#": 30}
 
 
 class HumbleList(list):
@@ -19,7 +20,7 @@ class HumbleList(list):
         try:
             return super(HumbleList, self).__getitem__(i)
         except IndexError:
-            return None
+            return " "
 
 
 def transform_matrix(matrix):
@@ -40,8 +41,8 @@ def create_repo():
     exe("git init --quiet %s" % REPO, cwd=None)
 
 
-def commit(day):
-    timestamp = day.strftime("%Y.%m.%d 16:00:00 +0200")
+def commit(day, minutes):
+    timestamp = day.strftime("%Y.%m.%d " + "16:%02i:00 +0200" % minutes)
     filename = "coolfile"
     exe("echo '%s' > %s" % (timestamp, filename),
         "git add %s" % filename,
@@ -59,8 +60,10 @@ def decorate(matrix):
 
     for row in matrix:
         for col in row:
-            if col and col != " ":
-                commit(d)
+            minutes = 0
+            for _ in range(densities.get(col, 0)):
+                commit(d, minutes)
+                minutes += 1
             d += timedelta(days=1)
 
 
